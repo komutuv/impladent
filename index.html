@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>IBAN Kopyala</title>
+  <meta name="theme-color" content="#0b1220" />
+  <style>
+    :root { --bg:#0b1220; --card:#111a2e; --text:#eaf0ff; --muted:#9fb0d0; --btn:#2b6cff; --btn2:#1a2744; }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 800px at 20% 10%, #1a2a5a 0%, var(--bg) 45%, #070b14 100%);
+      color:var(--text); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
+    }
+    .wrap{width:min(680px, 100%)}
+    .card{
+      background: rgba(17,26,46,.86);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 20px;
+      padding: 22px;
+      box-shadow: 0 18px 60px rgba(0,0,0,.45);
+      backdrop-filter: blur(8px);
+    }
+    h1{margin:0 0 8px; font-size:22px}
+    p{margin:0 0 18px; color:var(--muted); line-height:1.35}
+    .row{display:flex; gap:10px; flex-wrap:wrap}
+    .box{
+      background: rgba(0,0,0,.18);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 14px;
+      padding: 14px;
+      width:100%;
+    }
+    .label{font-size:12px; letter-spacing:.4px; text-transform:uppercase; color:var(--muted); margin-bottom:8px}
+    .iban{
+      font-size:20px; font-weight:700; word-break:break-word;
+    }
+    .name{
+      font-size:16px; font-weight:600;
+    }
+    button{
+      appearance:none; border:0; border-radius: 14px;
+      padding: 13px 14px; font-weight:700; cursor:pointer;
+      transition: transform .05s ease, opacity .2s ease;
+    }
+    button:active{transform: scale(.99)}
+    .primary{background: var(--btn); color:white; flex:1}
+    .secondary{background: var(--btn2); color: var(--text); flex:1}
+    .toast{
+      margin-top:12px; font-size:13px; color:#bfe3c2; display:none;
+      background: rgba(20,80,40,.25); border: 1px solid rgba(120,255,160,.25);
+      padding:10px 12px; border-radius: 12px;
+    }
+    .hint{margin-top:10px; font-size:12px; color:var(--muted)}
+    a{color:#9dc0ff}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>IBAN Bilgisi</h1>
+      <p>Butona bas → IBAN otomatik panoya kopyalanır. Sonra bankanda “Havale/EFT” kısmına yapıştır.</p>
+
+      <div class="box" style="margin-bottom:10px">
+        <div class="label">Alıcı</div>
+        <div class="name" id="holder">Ayşe Halide Akıncı</div>
+      </div>
+
+      <div class="box" style="margin-bottom:14px">
+        <div class="label">IBAN</div>
+        <div class="iban" id="ibanText">TR37 0006 2000 4070 0006 2914 77</div>
+        <div class="hint">Kopyalanacak format: boşluksuz (TR370006200040700006291477)</div>
+      </div>
+
+      <div class="row">
+        <button class="primary" id="copyBtn">IBAN’ı Kopyala</button>
+        <button class="secondary" id="copyAllBtn">Hepsini Kopyala</button>
+      </div>
+
+      <div class="toast" id="toast">✅ Kopyalandı!</div>
+      <div class="hint">iPhone’da Safari’de açınca sorunsuz çalışır. Eski cihazlarda kopyalama engellenirse IBAN’a basılı tutup kopyalayabilirsin.</div>
+    </div>
+  </div>
+
+<script>
+  const holder = "Ayşe Halide Akıncı";
+  const ibanPretty = "TR37 0006 2000 4070 0006 2914 77";
+  const ibanRaw = ibanPretty.replace(/\s+/g, "");
+
+  const toast = document.getElementById("toast");
+
+  async function copyText(text){
+    try{
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        // fallback
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        ta.style.top = "-9999px";
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        document.execCommand("copy");
+        ta.remove();
+      }
+      toast.style.display = "block";
+      clearTimeout(window.__t);
+      window.__t = setTimeout(()=> toast.style.display="none", 2000);
+    } catch(e){
+      alert("Kopyalama engellendi. IBAN'a basılı tutup manuel kopyalayabilirsin:\n" + text);
+    }
+  }
+
+  document.getElementById("copyBtn").addEventListener("click", ()=> copyText(ibanRaw));
+  document.getElementById("copyAllBtn").addEventListener("click", ()=> copyText(`Alıcı: ${holder}\nIBAN: ${ibanRaw}`));
+</script>
+</body>
+</html>
